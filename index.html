@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>臺南市消防局外勤人員深夜勤務統計</title>
+</head>
+<body>
+    <h1>臺南市消防局深夜勤務統計</h1>
+
+    <!-- 使用者帳號輸入 -->
+    <label for="username">使用者帳號：</label>
+    <input type="text" id="username" name="username" oninput="checkUsername()">
+    <span id="nameDisplay"></span>
+    <button onclick="createAccount()">創立帳號</button>
+    <br><br>
+
+    <!-- 出勤時間輸入 -->
+    <label for="attendanceTimeHour">出勤時間：</label>
+    <input type="number" id="attendanceTimeHour" name="attendanceTimeHour" min="0" max="23" placeholder="時">
+    <input type="number" id="attendanceTimeMinute" name="attendanceTimeMinute" min="0" max="59" placeholder="分">
+    <br><br>
+
+    <!-- 返隊時間輸入 -->
+    <label for="returnTimeHour">返隊時間：</label>
+    <input type="number" id="returnTimeHour" name="returnTimeHour" min="0" max="23" placeholder="時">
+    <input type="number" id="returnTimeMinute" name="returnTimeMinute" min="0" max="59" placeholder="分">
+
+    <!-- 返隊日期輸入 -->
+    <label for="returnDate">返隊日期：</label>
+    <input type="date" id="returnDate" name="returnDate">
+    <br><br>
+
+    <!-- 勤務項目輸入 -->
+    <label for="taskItem">勤務項目：</label>
+    <input type="text" id="taskItem" name="taskItem">
+    <br><br>
+
+    <button onclick="addItem()">新增</button>
+    <br><br>
+
+    <!-- 月份選擇 -->
+    <label for="monthSelect">選擇月份：</label>
+    <select id="monthSelect">
+        <option value="01">1月</option>
+        <option value="02">2月</option>
+        <option value="03">3月</option>
+        <option value="04">4月</option>
+        <option value="05">5月</option>
+        <option value="06">6月</option>
+        <option value="07">7月</option>
+        <option value="08">8月</option>
+        <option value="09">9月</option>
+        <option value="10">10月</option>
+        <option value="11">11月</option>
+        <option value="12">12月</option>
+    </select>
+    <button onclick="getMonthlyRecords()">查看月份</button>
+    <div id="recordsDisplay"></div>
+
+    <!-- 匯出 Excel -->
+    <button onclick="exportToExcel()">匯出Excel</button>
+
+    <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwrCSggMYILCdW-0GYIWee6xJuFn4f3Qbd3XfcNjS-lGPpZljIV-XV8D7KMlKNoLyEAqQ/exec";
+
+    // 創建帳號
+    function createAccount() {
+        const username = document.getElementById('username').value;
+        const name = prompt("請輸入姓名");
+
+        if (!username || !name) {
+            alert("請輸入帳號和姓名");
+            return;
+        }
+
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "createUser", username, name }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(data => alert(data));
+    }
+
+    // 自動查找帳號
+    function checkUsername() {
+        const username = document.getElementById('username').value;
+        if (!username) {
+            document.getElementById('nameDisplay').innerText = "";
+            return;
+        }
+
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getUser", username }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('nameDisplay').innerText = data;
+        });
+    }
+
+    // 新增勤務記錄
+    function addItem() {
+        const username = document.getElementById('username').value;
+        const date = document.getElementById('returnDate').value;
+        const hour = document.getElementById('returnTimeHour').value;
+        const minute = document.getElementById('returnTimeMinute').value;
+        const task = document.getElementById('taskItem').value;
+
+        if (!username || !date || !hour || !minute || !task) {
+            alert("請輸入完整資訊");
+            return;
+        }
+
+        const time = String(hour).padStart(2, '0') + ":" + String(minute).padStart(2, '0');
+
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "addRecord", username, date, time, task }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(data => alert(data));
+    }
+
+    // 查詢月份記錄
+    function getMonthlyRecords() {
+        const username = document.getElementById('username').value;
+        const month = document.getElementById('monthSelect').value;
+
+        if (!username) {
+            alert("請先輸入帳號");
+            return;
+        }
+
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getRecords", username, month }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(res => res.text())
+        .then(data => {
+            try {
+                const records = JSON.parse(data);
+                let results = records.map(record => 
+                    `日期：${record[1]}, 時間：${record[2]}, 項目：${record[3]}`
+                ).join("<br>");
+                document.getElementById('recordsDisplay').innerHTML = results || "無記錄";
+            } catch (e) {
+                alert("查詢失敗：" + data);
+            }
+        });
+    }
+
+    </script>
+
+</body>
+</html>
