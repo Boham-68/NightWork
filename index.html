@@ -78,7 +78,7 @@
     <div id="status"></div>
 
     <script>
-        document.getElementById('dataForm').addEventListener('submit', function(e) {
+document.getElementById('dataForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     // 獲取表單數據
@@ -95,44 +95,25 @@
     // 替換成你的Google Apps Script網址
     const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
     
-    // 使用XMLHttpRequest代替fetch
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', scriptURL, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    // 構建GET請求URL
+    const url = `${scriptURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&message=${encodeURIComponent(message)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
     
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.result === 'success') {
-                    statusDiv.innerHTML = response.message || '資料已成功提交！';
-                    statusDiv.className = 'success';
-                    document.getElementById('dataForm').reset();
-                } else {
-                    throw new Error(response.error || '提交失敗');
-                }
-            } catch (error) {
-                statusDiv.innerHTML = '解析回應時發生錯誤: ' + error.message;
-                statusDiv.className = 'error';
-            }
+    // 使用GET方法
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        if (data.result === 'success') {
+            statusDiv.innerHTML = data.message || '資料已成功提交！';
+            statusDiv.className = 'success';
+            document.getElementById('dataForm').reset();
         } else {
-            statusDiv.innerHTML = '提交失敗，伺服器回應: ' + xhr.status;
-            statusDiv.className = 'error';
+            throw new Error(data.error || '提交失敗');
         }
-    };
-    
-    xhr.onerror = function() {
-        statusDiv.innerHTML = '提交時發生網路錯誤';
+    })
+    .catch(error => {
+        statusDiv.innerHTML = '提交時發生錯誤: ' + error.message;
         statusDiv.className = 'error';
-        console.error('Network error occurred');
-    };
-    
-    xhr.send(JSON.stringify({
-        name: name,
-        email: email,
-        message: message,
-        timestamp: new Date().toISOString()
-    }));
+    });
 });
     </script>
 </body>
