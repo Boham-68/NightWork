@@ -2,209 +2,127 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>臺南市消防局外勤人員深夜勤務統計</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets 資料表單</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
-    <h1>臺南市消防局深夜勤務統計</h1>
-
-    <button onclick="showCreateAccountForm()">創立帳號</button>
-    <div id="createAccountForm" style="display:none;">
-        <label for="newUsername">使用者帳號：</label>
-        <input type="text" id="newUsername" name="newUsername">
-        <label for="newName">姓名：</label>
-        <input type="text" id="newName" name="newName">
-        <button onclick="createAccount()">確定</button>
-    </div>
-    <br><br>
-
-    <label for="username">使用者帳號：</label>
-    <input type="text" id="username" name="username" oninput="checkUsername()">
-    <span id="nameDisplay"></span>
-    <br><br>
-
-    <label for="attendanceDate">出勤日期：</label>
-    <input type="date" id="attendanceDate" name="attendanceDate">
-    <label for="attendanceTimeHour">出勤時間：</label>
-    <input type="number" id="attendanceTimeHour" name="attendanceTimeHour" min="0" max="23" placeholder="時">
-    <input type="number" id="attendanceTimeMinute" name="attendanceTimeMinute" min="0" max="59" placeholder="分">
-    <br><br>
-
-    <label for="returnDate">返隊日期：</label>
-    <input type="date" id="returnDate" name="returnDate">
-    <label for="returnTimeHour">返隊時間：</label>
-    <input type="number" id="returnTimeHour" name="returnTimeHour" min="0" max="23" placeholder="時">
-    <input type="number" id="returnTimeMinute" name="returnTimeMinute" min="0" max="59" placeholder="分">
-    <br><br>
-
-    <label for="taskItem">勤務項目：</label>
-    <input type="text" id="taskItem" name="taskItem">
-    <br><br>
-
-    <button onclick="addItem()">新增</button>
-    <br><br>
-
-    <label for="monthSelect">選擇月份：</label>
-    <select id="monthSelect">
-        <option value="01">1月</option>
-        <option value="02">2月</option>
-        <option value="03">3月</option>
-        <option value="04">4月</option>
-        <option value="05">5月</option>
-        <option value="06">6月</option>
-        <option value="07">7月</option>
-        <option value="08">8月</option>
-        <option value="09">9月</option>
-        <option value="10">10月</option>
-        <option value="11">11月</option>
-        <option value="12">12月</option>
-    </select>
-    <button onclick="getMonthlyRecords()">查看月份</button>
-    <div id="recordsDisplay"></div>
-
-    <button onclick="exportToExcel()">匯出Excel</button>
+    <h1>資料輸入表單</h1>
+    
+    <form id="dataForm">
+        <div class="form-group">
+            <label for="name">姓名:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">電子郵件:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="message">訊息內容:</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+        </div>
+        
+        <button type="submit">提交資料</button>
+    </form>
+    
+    <div id="status"></div>
 
     <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxdSAqIoF4CJ4hY3-SNVANy9XcYmZvAFeUp-KSdkJHWgT8OLBReYkTKLFhFvk1ZTyI0/exec"; // 請替換成您的 Google Apps Script URL
-
-    function showCreateAccountForm() {
-        document.getElementById('createAccountForm').style.display = 'block';
-    }
-
-    function createAccount() {
-        const username = document.getElementById('newUsername').value;
-        const name = document.getElementById('newName').value;
-
-        if (!username || !name) {
-            alert("請輸入帳號和姓名");
-            return;
-        }
-
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "createUser", username, name }),
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(res => res.text())
-        .then(data => {
-            alert(data);
-            console.log("API 回應：", data);
-            document.getElementById('createAccountForm').style.display = 'none'; // 隱藏表單
-        })
-        .catch(error => {
-            console.error("發生錯誤:", error);
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 獲取表單數據
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            // 顯示處理中訊息
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '處理中，請稍候...';
+            statusDiv.className = '';
+            statusDiv.style.display = 'block';
+            
+            // 替換成你的Google Apps Script網址
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyprsHSTE4k6yYsiOB9TShs-X3VG81gSogmE16LbqkLlCCWG-aLafk1L0R79BTNP378XA/exec';
+            
+            // 發送資料到Google Apps Script
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    message: message,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    statusDiv.innerHTML = data.message || '資料已成功提交！';
+                    statusDiv.className = 'success';
+                    document.getElementById('dataForm').reset();
+                } else {
+                    throw new Error(data.error || '提交失敗');
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = '提交時發生錯誤: ' + error.message;
+                statusDiv.className = 'error';
+            });
         });
-    }
-
-    function checkUsername() {
-        const username = document.getElementById('username').value;
-        if (!username) {
-            document.getElementById('nameDisplay').innerText = "";
-            return;
-        }
-
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "getUser", username }),
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(res => res.text())
-        .then(data => {
-            document.getElementById('nameDisplay').innerText = data;
-        });
-    }
-
-    function addItem() {
-        const username = document.getElementById('username').value;
-        const attendanceDate = document.getElementById('attendanceDate').value;
-        const returnDate = document.getElementById('returnDate').value;
-        const attendanceHour = parseInt(document.getElementById('attendanceTimeHour').value);
-        const attendanceMinute = parseInt(document.getElementById('attendanceTimeMinute').value);
-        const returnHour = parseInt(document.getElementById('returnTimeHour').value);
-        const returnMinute = parseInt(document.getElementById('returnTimeMinute').value);
-        const task = document.getElementById('taskItem').value;
-
-        if (!username || !attendanceDate || !returnDate || isNaN(attendanceHour) || isNaN(attendanceMinute) || isNaN(returnHour) || isNaN(returnMinute) || !task) {
-            alert("請輸入完整資訊");
-            return;
-        }
-
-        if (returnHour < attendanceHour || (returnHour === attendanceHour && returnMinute < attendanceMinute)) {
-            alert("返隊時間必須晚於出勤時間");
-            return;
-        }
-
-        const attendanceTime = String(attendanceHour).padStart(2, '0') + ":" + String(attendanceMinute).padStart(2, '0');
-        const returnTime = String(returnHour).padStart(2, '0') + ":" + String(returnMinute).padStart(2, '0');
-
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "addRecord", username, attendanceDate, returnDate, attendanceTime, returnTime, task }),
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(res => res.text())
-        .then(data => alert(data));
-    }
-
-    function getMonthlyRecords() {
-        const username = document.getElementById('username').value;
-        const month = document.getElementById('monthSelect').value;
-
-        if (!username) {
-            alert("請先輸入帳號");
-            return;
-        }
-
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "getRecords", username, month }),
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(res => res.text())
-        .then(data => {
-            try {
-                const records = JSON.parse(data);
-                let results = records.map(record =>
-                    `日期：${record[1]}, 出勤時間：${record[3]}, 返隊時間：${record[4]}, 項目：${record[5]}`
-                ).join("<br>");
-                document.getElementById('recordsDisplay').innerHTML = results || "無記錄";
-            } catch (e) {
-                alert("查詢失敗：" + data);
-            }
-        });
-    }
-
-    function exportToExcel() {
-        const username = document.getElementById('username').value;
-        const month = document.getElementById('monthSelect').value;
-
-        if (!username) {
-            alert("請先輸入帳號");
-            return;
-        }
-
-        fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "exportExcel", username, month }),
-            headers: { "Content-Type": "application/json" }
-        })
-        .then(response => response.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${username}_${month}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(error => {
-            console.error("匯出 Excel 失敗:", error);
-            alert("匯出 Excel 失敗");
-        });
-    }
-
-    </script>
-
+    </script>
 </body>
-
 </html>
