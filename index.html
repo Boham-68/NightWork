@@ -58,7 +58,7 @@
     
     <form id="dataForm">
         <div class="form-group">
-            <label for="name">姓名:</label>
+            <label for="name">姓#名:</label>
             <input type="text" id="name" name="name" required>
         </div>
         
@@ -79,50 +79,61 @@
 
     <script>
         document.getElementById('dataForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // 獲取表單數據
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message').value;
-            
-            // 顯示處理中訊息
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = '處理中，請稍候...';
-            statusDiv.className = '';
-            statusDiv.style.display = 'block';
-            
-            // 替換成你的Google Apps Script網址
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbzxdtsfjYss-Fl9744_rqVZRE4onZopPtGvoBIOsnCG2dWmY5Ef37BkXYfIV9jQs3rFcw/exec';
-            
-            // 發送資料到Google Apps Script
-            fetch(scriptURL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    email: email,
-                    message: message,
-                    timestamp: new Date().toISOString()
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.result === 'success') {
-                    statusDiv.innerHTML = data.message || '資料已成功提交！';
+    e.preventDefault();
+    
+    // 獲取表單數據
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const message = document.getElementById('message').value;
+    
+    // 顯示處理中訊息
+    const statusDiv = document.getElementById('status');
+    statusDiv.innerHTML = '處理中，請稍候...';
+    statusDiv.className = '';
+    statusDiv.style.display = 'block';
+    
+    // 替換成你的Google Apps Script網址
+    const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+    
+    // 使用XMLHttpRequest代替fetch
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', scriptURL, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.result === 'success') {
+                    statusDiv.innerHTML = response.message || '資料已成功提交！';
                     statusDiv.className = 'success';
                     document.getElementById('dataForm').reset();
                 } else {
-                    throw new Error(data.error || '提交失敗');
+                    throw new Error(response.error || '提交失敗');
                 }
-            })
-            .catch(error => {
-                statusDiv.innerHTML = '提交時發生錯誤: ' + error.message;
+            } catch (error) {
+                statusDiv.innerHTML = '解析回應時發生錯誤: ' + error.message;
                 statusDiv.className = 'error';
-            });
-        });
+            }
+        } else {
+            statusDiv.innerHTML = '提交失敗，伺服器回應: ' + xhr.status;
+            statusDiv.className = 'error';
+        }
+    };
+    
+    xhr.onerror = function() {
+        statusDiv.innerHTML = '提交時發生網路錯誤';
+        statusDiv.className = 'error';
+        console.error('Network error occurred');
+    };
+    
+    xhr.send(JSON.stringify({
+        name: name,
+        email: email,
+        message: message,
+        timestamp: new Date().toISOString()
+    }));
+});
     </script>
 </body>
 </html>
