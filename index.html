@@ -1,120 +1,45 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Sheets 資料表單</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #3367d6;
-        }
-        #status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            display: none;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-</head>
-<body>
-    <h1>資料輸入表單</h1>
-    
-    <form id="dataForm">
-        <div class="form-group">
-            <label for="name">姓的名:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="email">電子郵件:</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="message">訊息內容:</label>
-            <textarea id="message" name="message" rows="4" required></textarea>
-        </div>
-        
-        <button type="submit">提交資料</button>
-    </form>
-    
-    <div id="status"></div>
+<html lang="en">
 
-    <script>
-document.getElementById('dataForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // 獲取表單數據
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const message = document.getElementById('message').value;
-    
-    // 顯示處理中訊息
-    const statusDiv = document.getElementById('status');
-    statusDiv.innerHTML = '處理中，請稍候...';
-    statusDiv.className = '';
-    statusDiv.style.display = 'block';
-    
-    // 替換成你的Google Apps Script網址
-    const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
-    
-    // 構建GET請求URL
-    const url = `${scriptURL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&message=${encodeURIComponent(message)}&timestamp=${encodeURIComponent(new Date().toISOString())}`;
-    
-    // 使用GET方法
-    fetch(url)
-    .then(response => response.json())
-    .then(data => {
-        if (data.result === 'success') {
-            statusDiv.innerHTML = data.message || '資料已成功提交！';
-            statusDiv.className = 'success';
-            document.getElementById('dataForm').reset();
-        } else {
-            throw new Error(data.error || '提交失敗');
-        }
-    })
-    .catch(error => {
-        statusDiv.innerHTML = '提交時發生錯誤: ' + error.message;
-        statusDiv.className = 'error';
-    });
-});
-    </script>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<meta name="viewport" content="width=device-width>, initial-
+scale=1.0">
+
+<title>Display Web</title>
+<style type="text/css">
+html {
+overflow: auto;
+}
+
+html,
+body,
+div,
+iframe {
+margin: 0px;
+padding: 0px;
+height: 100%;
+border: none;
+}
+
+iframe {
+display: block;
+width: 100%;
+border: none;
+overflow-y: auto;
+overflow-x: hidden;
+}
+
+</style>
+</head>
+
+<body>
+<iframe src="https://script.google.com/macros/s/AKfycbxvpDOCAI8Qfx_hdfTjOY-VdIqJXXkXawFAVz78tNIfJeG0zPBTcmVEIr3ox7zRZI6n/exec" frameborder="0" marginheight="0" marginwidth="0"
+width="100%" height="100%" scrolling="auto">
+</iframe>
+
 </body>
+
 </html>
